@@ -1,0 +1,66 @@
+//traffic light controller
+module traf_light_contr(clk,reset,red,yellow,green);
+  input wire clk,reset;
+  output reg red,yellow,green;
+  
+  parameter Green = 2'b00;
+  parameter Yellow = 2'b01;
+  parameter Red = 2'b10;
+  
+  parameter g_time = 30;
+  parameter y_time = 10;
+  parameter r_time = 40;
+  
+  reg [1:0] present_state, next_state;
+  reg [6:0] count;
+  
+  always @(posedge clk or posedge reset) begin
+    if(reset) begin
+      present_state = green;
+      count <= 0;
+    end
+  else begin
+    present_state <= next_state;
+    if(next_state != present_state)
+      count <=0;
+    else
+      count = count + 1;
+  end
+  end
+  
+  always @(*) begin
+    case(present_state)
+      Green: begin
+        if(count >= g_time-1)
+          next_state = yellow;
+        else
+          next_state = green;
+      end
+      Yellow: begin
+        if(count >= y_time-1)
+          next_state = red;
+        else
+          next_state = yellow;
+      end
+      Red: begin
+        if(count >= r_time-1)
+          next_state = green;
+        else
+          next_state = red;
+      end
+      default: next_state = green;
+    endcase
+  end
+  
+  always @(*) begin
+    red = 0;
+    yellow = 0;
+    green = 0;
+    case(present_state)
+      Green: green = 1;
+      Yellow: yellow = 1;
+      Red: red = 1;
+      default: red = 1;
+    endcase
+  end
+endmodule
